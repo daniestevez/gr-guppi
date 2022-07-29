@@ -1,0 +1,38 @@
+id: guppi_guppi_sink
+label: GUPPI File Sink
+category: '[GUPPI]'
+
+templates:
+  imports: from gnuradio import guppi
+  make: guppi.guppi_sink(${filename}, ${obsnchan}, ${ndim}, ${npol}, ${obsfreq}, ${obsbw})
+
+parameters:
+- id: filename
+  label: File
+  dtype: file_save
+- id: obsnchan
+  label: Number of channels
+  dtype: int
+- id: ndim
+  label: Samples per block
+  dtype: int
+- id: npol
+  label: Number of polarizations (1 or 2)
+  dtype: int
+  default: 1
+  hide: part
+- id: obsfreq
+  label: Observing frequency (Hz)
+  dtype: float
+- id: obsbw
+  label: Observing bandwidth (Hz)
+  dtype: float
+  default: samp_rate
+
+inputs:
+- domain: stream
+  dtype: byte
+  vlen: ${ 2 * obsnchan }
+  multiplicity: ${ npol }
+
+file_format: 1

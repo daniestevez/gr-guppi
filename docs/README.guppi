@@ -1,0 +1,11 @@
+This is the guppi-write-a-block package meant as a guide to building
+out-of-tree packages. To use the guppi blocks, the Python namespaces
+is in 'guppi', which is imported as:
+
+    import guppi
+
+See the Doxygen documentation for details about the blocks available
+in this package. A quick listing of the details can be found in Python
+after importing by using:
+
+    help(guppi)
