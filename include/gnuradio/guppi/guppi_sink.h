@@ -21,7 +21,7 @@ namespace guppi {
  * \ingroup guppi
  *
  * \details
- * 
+ *
  * The GUPPI File Sink block writes single or dual-polarization channelized
  * 8-bit samples into a GUPPI raw file.
  */
