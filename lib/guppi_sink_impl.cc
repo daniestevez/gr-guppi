@@ -20,10 +20,32 @@ guppi_sink::sptr guppi_sink::make(const char* filename,
                                   size_t ndim,
                                   size_t npol,
                                   double obsfreq,
-                                  double obsbw)
+                                  double obsbw,
+                                  const char* telescope,
+                                  const char* observer,
+                                  const char* src_name,
+                                  const char* proj_id,
+                                  double ra,
+                                  double dec,
+                                  double az,
+                                  double za,
+                                  double stt_mjd)
 {
-    return gnuradio::make_block_sptr<guppi_sink_impl>(
-        filename, obsnchan, ndim, npol, obsfreq, obsbw);
+    return gnuradio::make_block_sptr<guppi_sink_impl>(filename,
+                                                      obsnchan,
+                                                      ndim,
+                                                      npol,
+                                                      obsfreq,
+                                                      obsbw,
+                                                      telescope,
+                                                      observer,
+                                                      src_name,
+                                                      proj_id,
+                                                      ra,
+                                                      dec,
+                                                      az,
+                                                      za,
+                                                      stt_mjd);
 }
 
 
@@ -32,7 +54,16 @@ guppi_sink_impl::guppi_sink_impl(const char* filename,
                                  size_t ndim,
                                  size_t npol,
                                  double obsfreq,
-                                 double obsbw)
+                                 double obsbw,
+                                 const char* telescope,
+                                 const char* observer,
+                                 const char* src_name,
+                                 const char* proj_id,
+                                 double ra,
+                                 double dec,
+                                 double az,
+                                 double za,
+                                 double stt_mjd)
     : gr::sync_block(
           "guppi_sink",
           gr::io_signature::make(npol, npol, 2 * obsnchan * sizeof(std::int8_t)),
@@ -46,7 +77,16 @@ guppi_sink_impl::guppi_sink_impl(const char* filename,
       d_chan_bw(1e-6 * obsbw / obsnchan),
       d_blocsize(2 * ndim * obsnchan * npol * d_nbits / 8),
       d_pktidx(0),
-      d_nsamples_stored(0)
+      d_nsamples_stored(0),
+      d_telescope(telescope),
+      d_observer(observer),
+      d_src_name(src_name),
+      d_proj_id(proj_id),
+      d_ra(ra),
+      d_dec(dec),
+      d_az(az),
+      d_za(za),
+      d_stt_mjd(stt_mjd)
 {
     if ((d_npol != 1) && (d_npol != 2)) {
         throw std::runtime_error("[guppi_sink] npol should be either 1 or 2");
@@ -93,6 +133,99 @@ void guppi_sink_impl::write_guppi_block()
 {
     // Write header
     int len;
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "BACKEND = 'GUPPI'");
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "TELESCOP = '%s'", d_telescope.c_str());
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "OBSERVER = '%s'", d_observer.c_str());
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "SRC_NAME = '%s'", d_src_name.c_str());
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "PROJID = '%s'", d_proj_id.c_str());
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    double ra_hours = d_ra / 15.0;
+    int ra_hours_i = static_cast<int>(ra_hours);
+    double ra_minutes = (ra_hours - ra_hours_i) * 60.0;
+    int ra_minutes_i = static_cast<int>(ra_minutes);
+    double ra_seconds = (ra_minutes - ra_minutes_i) * 60.0;
+    len = snprintf(d_header_line,
+                   80,
+                   "RA_STR = '%02d:%02d:%02.4f'",
+                   ra_hours_i,
+                   ra_minutes_i,
+                   ra_seconds);
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "RA = %.4f", d_ra);
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    int dec_deg_i = static_cast<int>(d_dec);
+    double dec_minutes = (d_dec - dec_deg_i) * 60.0;
+    int dec_minutes_i = static_cast<int>(dec_minutes);
+    double dec_seconds = (dec_minutes - dec_minutes_i) * 60.0;
+    len = snprintf(d_header_line,
+                   80,
+                   "DEC_STR = '%+02d:%02d:%02.4f'",
+                   dec_deg_i,
+                   dec_minutes_i,
+                   dec_seconds);
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "DEC = %.4f", d_dec);
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "AZ = %.4f", d_az);
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "ZA = %.4f", d_za);
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    int imjd = static_cast<int>(d_stt_mjd);
+    int smjd = static_cast<int>((d_stt_mjd - imjd) * 86400.0);
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "STT_SMJD = %d", smjd);
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "STT_IMJD = %d", imjd);
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
+    prepare_header_line();
+    len = snprintf(d_header_line, 80, "STTVALID = 1");
+    d_header_line[std::min(len, 79)] = ' ';
+    write_header_line();
+
     prepare_header_line();
     len = snprintf(d_header_line, 80, "OBSFREQ = %e", d_obsfreq);
     d_header_line[std::min(len, 79)] = ' ';

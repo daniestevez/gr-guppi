@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <string>
 #include <vector>
 
 namespace gr {
@@ -42,6 +43,16 @@ private:
     // File
     FILE* d_fp;
     char d_header_line[80];
+    // Metadata
+    const std::string d_telescope;
+    const std::string d_observer;
+    const std::string d_src_name;
+    const std::string d_proj_id;
+    const double d_ra;
+    const double d_dec;
+    const double d_az;
+    const double d_za;
+    const double d_stt_mjd;
 
     void write_guppi_block();
 
@@ -64,7 +75,16 @@ public:
                     size_t ndim,
                     size_t d_npol,
                     double obsfreq,
-                    double obsbw);
+                    double obsbw,
+                    const char* telescope,
+                    const char* observer,
+                    const char* src_name,
+                    const char* proj_id,
+                    double ra,
+                    double dec,
+                    double az,
+                    double za,
+                    double stt_mjd);
     ~guppi_sink_impl();
 
     int work(int noutput_items,

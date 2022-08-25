@@ -40,13 +40,31 @@ public:
      * \param npol Number of polarizations (either 1 or 2)
      * \param obsfreq Frequency of the left edge of the central channel in Hz
      * \param obsbw Total bandwidth in Hz
+     * \param telescope Telescope name
+     * \param observer Observer on duty
+     * \param src_name Source name
+     * \param proj_id Project ID
+     * \param ra Right ascension (in degrees)
+     * \param dec Declination (in degrees)
+     * \param az Azimuth (in degrees)
+     * \param za Zenith angle (in degrees)
+     * \param stt_mjd Start time MJD
      */
     static sptr make(const char* filename,
                      size_t obsnchan,
                      size_t ndim,
                      size_t npol,
                      double obsfreq,
-                     double obsbw);
+                     double obsbw,
+                     const char* telescope,
+                     const char* observer,
+                     const char* src_name,
+                     const char* proj_id,
+                     double ra,
+                     double dec,
+                     double az,
+                     double za,
+                     double stt_mjd);
 };
 
 } // namespace guppi

@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(guppi_sink.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(94267759b2b40a5da8e2e0362c7a87f3)                     */
+/* BINDTOOL_HEADER_FILE_HASH(1ca26412393a1c8bf3357f69f23f9e85)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -40,9 +40,18 @@ void bind_guppi_sink(py::module& m)
            py::arg("filename"),
            py::arg("obsnchan"),
            py::arg("ndim"),
-           py::arg("num_polarizations"),
+           py::arg("npol"),
            py::arg("obsfreq"),
            py::arg("obsbw"),
+           py::arg("telescope"),
+           py::arg("observer"),
+           py::arg("src_name"),
+           py::arg("proj_id"),
+           py::arg("ra"),
+           py::arg("dec"),
+           py::arg("az"),
+           py::arg("za"),
+           py::arg("stt_mjd"),
            D(guppi_sink,make)
         )
         
